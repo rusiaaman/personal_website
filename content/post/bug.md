@@ -11,7 +11,7 @@ At Nanonets, we used to have intermittent failures for the longest time in one p
 ### Initial investigation
 The logs weren't helpful and I couldn't replicate the issue locally, but fortunately, I could get exec into the pod and get a shell. Python processes getting stuck aren't that rare, especially in a multi-processing environment, so I thought this would be an easy fix.
 
-`py-spy` makes it very easy to get a line level traceback of all the current running C-threads. The output of that was similar to this:
+`py-spy` makes it very easy to get a line-level python traceback of currently running threads. The output of that was similar to this:
 ```
 Thread 9954 (idle): "MainThread"
     term (zmq/sugar/context.py:195)
@@ -19,9 +19,9 @@ Thread 9954 (idle): "MainThread"
     random_function (mycodebase/mycode.py:83)
     ...
 ```
-Curiously, the code would get stuck at random places in our code and there was no call to __del__ of zmq/sugar/context.py in mycode.py. This happens because garbage collection (GC) is the one calling __del__ method, and GC can happen at any step of the code. 
+Curiously, the code would get stuck at random places in our code and there was no call to `__del__` of zmq/sugar/context.py in mycode.py. This happens because garbage collection (GC) is the one calling `__del__` method, and GC can happen at any step of the code. 
 
-the `term` method of `zmq` Context class would go on to call `term` method in the libzmq library. So the stack trace proceeds further into the C part of the code which `py-spy` doesn't trace.
+the `term` method of `zmq` Context class would go on to call `term` method in the libzmq library. So the stack trace proceeds further into the C part of the code which `py-spy` doesn't show.
 
 `zmq` is a messaging library for communicating over transports like TCP, and it was being used by bert-client library to retrieve BERT embeddings in our code.
 
@@ -36,11 +36,11 @@ def get_embedding(sentence):
 ```
 
 #### Not a multiprocessing problem
-Python processes getting stuck happens a lot in multiprocessing environment in `fork` mode if you aren't careful what you're forking. For example, python threads and sockets aren't safe to fork. I had similar encounters in the past like initializing a boto3 session before forking leading to programs getting intermittently stuck.
+Python processes getting stuck happens a lot in multiprocessing environments in `fork` mode if you aren't careful what you're forking. For example, python threads and sockets aren't safe to fork. I had similar encounters in the past like initializing a boto3 session before forking leading to programs getting intermittently stuck.
 
 I changed `fork` method to `spawn` method, which avoids pitfalls associated with `fork`, but the problem persisted. Replacing `BertClient` with `ConcurrentBertClient` didn't help.
 
-Finally, I resorted to changing multiprocessing to single process, confident that it must be a multi-processing related issue, but I was wrong. Synchronus the problem still happened.
+Finally, I resorted to changing multiprocessing to a single process, confident that it must be a multiprocessing-related issue, but I was wrong. The problem persisted in the synchronous code.
 
 #### GDB traceback
 
@@ -57,9 +57,9 @@ GDB backtrace looked something similar to [this](https://github.com/zeromq/pyzmq
 #3  0x00007ff5599d65bc in zmq::ctx_t::terminate (this=0x2a063d0) at src/ctx.cpp:165
 ```
 
-You can go up and down the frame and inspect values of the registers. You can inspect the value of the python variables using `py-print` in the python frames. ([python gdb tool should be configured](https://devguide.python.org/advanced-tools/gdb/))
+You can go up and down the frame and inspect the values of the registers. You can inspect the value of the python variables using `py-print` in the python frames. ([python gdb tool should be configured](https://devguide.python.org/advanced-tools/gdb/))
 
-Even though it was a good learning experience, this activity didn't give much insight into things. It did help me learn a bit about working of the garbage collector, which was connected to the problem.
+Even though it was a good learning experience, this activity didn't give much insight into things. It did help me learn a bit about the working of the garbage collector, which was connected to the problem.
 
 #### Resolution
 Around July this year, the failures started increasing. From 1 in 100 they went up to 1 in 5. That's when I decided to dedicate my complete effort to this.
@@ -73,7 +73,7 @@ None matched the exact problem, but there were some hints which helped me unders
 
 
 ##### Cause
-The root cause was that although the context manager used in the `get_embedding` method above closes the socket and context on exception, if the error is raised during __init__ of `BertClient`, the sockets created in __init__ wouldn't close.
+The root cause was that although the context manager used in the `get_embedding` method above closes the socket and context on exception, if the error is raised during `__init__` of `BertClient`, the sockets created in `__init__` wouldn't close.
 
 I confirmed that there were exceptions raised in `BertClient` while checking the health of the remote server due to load. The remote server wouldn't respond in time and it would raise a timeout error. This is caught by `retry_on_timeout` decorator, which calls the method again. Retries ensured that the method succeeds and training continues.
 
@@ -86,6 +86,6 @@ The code assumes that since `context` object holds a reference to `socket` objec
 `context.__del__` then calls term() which hangs indefinitely waiting for the socket to close which doesn't since GC runs synchronously. 
 
 #### Solution
-This was solved temporarily in our code by catching the exception during BertClient.__init__ and closing the zmq sockets.
+This was solved temporarily in our code by catching the exception during `BertClient.__init__` and closing the zmq sockets.
 
 With pyzmq==24 released in September, this is permanently solved (based on the code changes, although I haven't tested).
