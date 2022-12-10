@@ -1,17 +1,17 @@
 # Site settings
 baseurl = "https://arcfu.com/"
 languageCode = "en-us"
-title = "Hugo Cactus Theme"
+title = "Arcfu"
 theme = "hugo-cactus-theme"
 # Enter your tracking code to enable Google Analytics
 googleAnalytics = ""
 # Disable comments by leaving disqusShortname empty
-disqusShortname = "spf13"
+disqusShortname = ""
 
 [params]
 	name = "Aman Rusia"
 	description = "Personal blog and portfolio"
-	bio = "I work in Artificial Intelligence domain and I write about interesting things I encounter in professional life and otherwise. I am also interested in scientific methods and rationalism."
+	bio = "I work in the Artificial Intelligence field and I write about interesting things I encounter in professional life and otherwise. I am also interested in scientific methods and rationalism."
 	# Enter optionally your twitter account
 	enableRSS = true
 

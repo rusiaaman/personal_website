@@ -3,6 +3,11 @@
         {
             "language": "markdown",
             "scheme": "file"
+        },
+        {
+            "language": "plaintext",
+            "scheme": "file",
+            "pattern": "config.toml"
         }
     ]
 }
