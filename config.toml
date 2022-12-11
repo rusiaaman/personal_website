@@ -1,7 +1,7 @@
 # Site settings
 baseurl = "https://arcfu.com/"
 languageCode = "en-us"
-title = "Arcfu"
+title = "Aman Rusia"
 theme = "hugo-cactus-theme"
 # Enter your tracking code to enable Google Analytics
 googleAnalytics = ""
