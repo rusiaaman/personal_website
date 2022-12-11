@@ -7,7 +7,7 @@ menu = "main"
 
 Born and raised in India, I have expertise in deep-learning and ML development.
 
-My latest Resume: [last updated 11-Dec-2022](pdf/Resume2022.pdf)
+My latest Resume: [last updated 11-Dec-2022](/pdf/Resume2022.pdf)
 
 ***
 
