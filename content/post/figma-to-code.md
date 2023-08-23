@@ -1,6 +1,6 @@
 ---
 Author: Aman Rusia
-Date: 2021-01-30
+Date: 2023-08-23
 title: "What's so hard about generating code from Figma? A case of minimising description length."
 ---
 
@@ -46,6 +46,8 @@ That’s the last piece of the puzzle. We want to generate code that a developer
 
 I like to call this idea human biased minimum description length.
 
+
+
 ## Will this be solved soon?
 
 Has anything changed recently for you to update your estimate on this problem being solved?
@@ -56,4 +58,9 @@ The idea of minimizing human biased minimum description length for generating CS
 
 We can utilize special LLMs that can understand Figma designs to do layout detection, component detection, CSS property generation, code and comment generation which take minimal head space in a developers mind. All because LLMs can mimic human mental model of software programs so well.
 
-So yes, Figma to Code will become usable very soon. That’s why I joined Kombai to build such a software. [Here’s the Product Hunt launch of our research preview if you want to know more](https://kombai.com/launch).
+So yes, Figma to Code will become usable very soon. 
+
+---
+Thanks for reading.
+
+AI can be used to boost web developers' productivity. That’s why I joined Kombai to build such a software. [Here’s the Product Hunt launch of our research preview if you want to know more](https://kombai.com/launch).
