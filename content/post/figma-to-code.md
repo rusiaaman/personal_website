@@ -18,7 +18,7 @@ A modern developer would create this using a flex div at top with `justify-conte
 
 ![Simple card 3 elements](/images/post-f2d/asana2.png)
 
-The complexity of the problem is that exact look can be created using just margins. A fixed left-margin before all three elements can give you the exact pixel replication, no grouping needed.
+The complexity of the problem is that exact look can be created using just margins. A fixed left-margin before all three elements can give you the exact pixel replication, no grouping needed. And this is design is super bad.
 
 There lies the problem. There are multiple CSS possible for the same design. However, surprisingly, Occam's razor (minimum description length) can predict what CSS and HTML humans prefer.
 
