@@ -20,7 +20,9 @@ A modern developer would create this using a flex div at top with `justify-conte
 
 The complexity of the problem is that exact look can be created using just margins. A fixed left-margin before all three elements can give you the exact pixel replication, no grouping needed. And this is design is super bad.
 
-There lies the problem. There are multiple CSS possible for the same design. However, surprisingly, Occam's razor (minimum description length) can predict what CSS and HTML humans prefer.
+There lies the problem. There are multiple CSS possible for the same design and it's not easy to find the correct one without having deeper understanding of the design and development systems.
+
+However, surprisingly, Occam's razor (minimum description length) can predict what CSS and HTML humans prefer.
 
 In the flex based design, you avoid the left-margin property on the info-icon (the rightmost icon) that’s present in the margin-only design. The left-margin property is an integer that has no mutual information with other parts of the design. On the contrary, the flex design’s `justify-content: space-between` is much more ordered and simple.
 
@@ -52,14 +54,12 @@ Has anything changed recently for you to update your estimate on this problem be
 
 I don’t know if the problem could be solved but something has changed so that at least the software can now be usable rather than being a complete waste of developers’ time. That change is the advent of LLMs (Large Language Models).
 
-The idea of minimizing human biased minimum description length for generating CSS and HTML could not be solved without encoding human knowledge in the software. This is where LLMs come.
+The idea of minimizing human biased minimum description length for generating CSS and HTML could not be implemented without encoding human knowledge in the software. This is where LLMs come.
 
 We can utilize special LLMs that can understand Figma designs to do layout detection, component detection, CSS property generation, code and comment generation which take minimal head space in a developers mind. All because LLMs can mimic human mental model of software programs so well.
 
 This was not so easily possible earlier. So yes, I'm highly certain that Figma to Code will become usable very soon.
 
 ---
-
-Thanks for reading.
 
 AI can be used to boost web developers' productivity. That’s why I joined Kombai to build such a software. [Here’s the Product Hunt launch of our research preview if you want to know more](https://kombai.com/launch).
