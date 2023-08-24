@@ -62,4 +62,4 @@ This was not so easily possible earlier. So yes, I'm highly certain that Figma t
 
 ---
 
-AI can be used to boost web developers' productivity. That’s why I joined Kombai to build such a software. [Here’s the Product Hunt launch of our research preview if you want to know more](https://kombai.com/launch).
+AI can be used to boost web developers' productivity. That’s why I joined Kombai to build such a software. Visit our website https://kombai.com for further info.
