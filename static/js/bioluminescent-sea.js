@@ -711,8 +711,17 @@ class BioluminescentSea {
     this.ctx.arc(creature.x, creature.y, radius, 0, Math.PI * 2);
     this.ctx.fill();
     
-    // Draw subtle highlights where waves would be
-    const gridSize = this.config.waveGridSize / 2;
+    // Check if the creature is too close to the surface
+    // If it's very shallow, skip drawing the grid points to avoid the visible grid pattern
+    if (creature.depth < 0.1) {
+      return; // Skip drawing grid points for very shallow creatures
+    }
+    
+    // Only draw wave highlights if creature isn't too close to surface
+    // This prevents the grid-like appearance when creatures get bigger
+    
+    // Use a much larger grid size to make the grid less visible
+    const gridSize = this.config.waveGridSize;  // Double the size to reduce grid density
     const startX = Math.max(0, Math.floor((creature.x - radius) / gridSize));
     const startY = Math.max(0, Math.floor((creature.y - radius) / gridSize));
     const endX = Math.min(Math.ceil(this.canvas.width / gridSize), Math.ceil((creature.x + radius) / gridSize));
@@ -727,50 +736,30 @@ class BioluminescentSea {
     // Use the brightness transition factor to smoothly fade the effect
     const nearMouse = mouseNearby && this.brightnessTransitionFactor > 0.1;
     
-    for (let y = startY; y < endY; y++) {
-      for (let x = startX; x < endX; x++) {
-        const pointX = x * gridSize;
-        const pointY = y * gridSize;
+    // Instead of drawing individual dots, draw a smoother wave effect
+    const ctx = this.ctx;
+    ctx.save();
+    
+    // Create a more organic-looking wave pattern
+    if (nearMouse && waveHeight > 0.5) {
+      // Draw a few random wave lines instead of a grid of dots
+      ctx.strokeStyle = `rgba(${this.hslToRgb(h, 80, 70)}, ${illuminationIntensity * 0.5})`;
+      ctx.lineWidth = 0.5;
+      
+      // Draw a few curved lines to represent waves
+      for (let i = 0; i < 3; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const startRadius = radius * (0.3 + Math.random() * 0.5);
         
-        // Calculate distance from creature
-        const dx = pointX - creature.x;
-        const dy = pointY - creature.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (distance < radius) {
-          // Get wave height at this point
-          let waveHeight = this.getWaveHeight(pointX, pointY);
-          
-          // Enhance wave visibility near mouse
-          if (nearMouse) {
-            const mouseDx = pointX - this.mousePosition.x;
-            const mouseDy = pointY - this.mousePosition.y;
-            const mouseDistance = Math.sqrt(mouseDx * mouseDx + mouseDy * mouseDy);
-            
-            if (mouseDistance < this.mouseWaveRadius) {
-              // Amplify waves in mouse influence area
-              const mouseFactor = 1 - mouseDistance / this.mouseWaveRadius;
-              waveHeight *= (1 + mouseFactor);
-            }
-          }
-          
-          // Only draw highlights at wave peaks
-          if (waveHeight > 1) {
-            const opacity = (1 - distance / radius) * 0.2 * Math.min(1, waveHeight * 0.3);
-            this.ctx.fillStyle = `rgba(${this.hslToRgb(h, 80, 80)}, ${opacity})`;
-            
-            // Draw highlight dot, bigger near mouse
-            const dotSize = nearMouse ? 
-                          1 + Math.abs(waveHeight) * 0.6 : 
-                          1 + Math.abs(waveHeight) * 0.3;
-            
-            this.ctx.beginPath();
-            this.ctx.arc(pointX, pointY, dotSize, 0, Math.PI * 2);
-            this.ctx.fill();
-          }
-        }
+        ctx.beginPath();
+        ctx.arc(creature.x, creature.y, startRadius, angle, angle + Math.PI * (0.2 + Math.random() * 0.3), false);
+        ctx.stroke();
       }
+      
+      // No grid of dots at all
     }
+    
+    ctx.restore();
   }
   
   // Helper function for smooth easing - creates more natural movement
