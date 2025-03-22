@@ -305,16 +305,56 @@ class BioluminescentSea {
       // Get wave height at creature's position
       const waveHeight = this.getWaveHeight(creature.x, creature.y);
       
-      // Move the creature
+      // Check for mouse influence
+      let mouseInfluence = 0;
+      let mouseDirectionX = 0;
+      let mouseDirectionY = 0;
+      
+      if (!this.mouseIdle && this.mousePosition.x !== null && this.mousePosition.y !== null) {
+        const dx = creature.x - this.mousePosition.x;
+        const dy = creature.y - this.mousePosition.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance < this.mouseWaveRadius * 2) {
+          // Calculate mouse influence based on distance and creature depth
+          const distanceFactor = 1 - Math.min(1, distance / (this.mouseWaveRadius * 2));
+          const depthFactor = 1 - Math.min(1, creature.depth * 2);
+          mouseInfluence = distanceFactor * depthFactor * this.mouseWaveIntensity * 0.3;
+          
+          // Calculate direction away from mouse (for wave-like movement)
+          const angle = Math.atan2(dy, dx);
+          mouseDirectionX = Math.cos(angle) * mouseInfluence;
+          mouseDirectionY = Math.sin(angle) * mouseInfluence;
+        }
+      }
+      
+      // Move the creature with its base speed
       creature.x += Math.cos(creature.direction) * creature.speed * deltaTime;
       creature.y += Math.sin(creature.direction) * creature.speed * deltaTime;
       
-      // If creature is near surface, add some wave-based motion
-      if (creature.depth < 0.3) {
+      // Add undulating wave motion based on depth and wave height
+      // The closer to surface, the more pronounced the effect
+      const depthFactor = Math.max(0, 1 - creature.depth * 2); // 0 at deep, 1 at surface
+      
+      // Create a natural undulating motion using sine waves
+      const waveTime = performance.now() * 0.001;
+      const undulationX = Math.sin(waveTime * 0.5 + creature.x * 0.01) * (2 + Math.abs(waveHeight));
+      const undulationY = Math.cos(waveTime * 0.3 + creature.y * 0.01) * (2 + Math.abs(waveHeight));
+      
+      // Apply undulation based on depth and wave height
+      creature.x += undulationX * 0.05 * depthFactor;
+      creature.y += undulationY * 0.05 * depthFactor;
+      
+      // Add mouse-generated wave motion
+      creature.x += mouseDirectionX;
+      creature.y += mouseDirectionY;
+      
+      // Additional wave displacement for creatures near surface
+      if (creature.depth < 0.4) {
         // Apply stronger wave influence to creatures closer to surface
-        const waveInfluence = (0.3 - creature.depth) / 0.3;
-        creature.x += waveHeight * 0.02 * waveInfluence;
-        creature.y += waveHeight * 0.01 * waveInfluence;
+        const waveInfluence = (0.4 - creature.depth) / 0.4;
+        creature.x += waveHeight * 0.1 * waveInfluence; // Increased from 0.02
+        creature.y += waveHeight * 0.05 * waveInfluence; // Increased from 0.01
       }
       
       // Occasionally change direction (100x less frequent)
@@ -410,18 +450,24 @@ class BioluminescentSea {
       
       const waveHeight = this.getWaveHeight(creature.x, creature.y);
       
-      // Make creatures respond more dramatically to mouse-generated waves
+      // Calculate wave response based on mouse position and creature depth
       let waveResponse = waveHeight;
+      let distortionFactor = 0;
+      let mouseDistance = Infinity;
+      
       if (!this.mouseIdle && this.mousePosition.x !== null && this.mousePosition.y !== null) {
         const dx = creature.x - this.mousePosition.x;
         const dy = creature.y - this.mousePosition.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
+        mouseDistance = Math.sqrt(dx * dx + dy * dy);
         
-        if (distance < this.mouseWaveRadius * 1.5) {
+        if (mouseDistance < this.mouseWaveRadius * 1.5) {
           // Creatures respond more to mouse waves when they're near the surface
           const depthFactor = 1 - Math.min(1, creature.depth * 2);
-          const distanceFactor = 1 - distance / (this.mouseWaveRadius * 1.5);
+          const distanceFactor = 1 - mouseDistance / (this.mouseWaveRadius * 1.5);
           waveResponse = waveHeight * (1 + depthFactor * distanceFactor * 3);
+          
+          // Calculate distortion factor for visual stretching/compression
+          distortionFactor = distanceFactor * depthFactor * 0.5;
           
           // Chance for deep creatures to be attracted toward surface by mouse movement
           if (creature.depth > 0.4 && Math.random() < 0.01 * distanceFactor) {
@@ -430,16 +476,36 @@ class BioluminescentSea {
         }
       }
       
-      // Calculate brightness based on depth
-      const depthFactor = 1 - creature.depth;
-      const opacity = creature.atSurface ? 
-                    this.config.surfaceGlowOpacity : 
-                    this.config.deepGlowOpacity + depthFactor * 0.15;
+      // Calculate current time for wave animation
+      const now = performance.now() * 0.001;
       
-      // Calculate glow radius based on depth
-      const glowRadius = creature.atSurface ? 
-                       this.config.surfaceGlowRadius : 
-                       this.config.deepGlowRadius + depthFactor * 15;
+      // Calculate brightness based on depth and wave response
+      const depthFactor = 1 - creature.depth;
+      let opacity = creature.atSurface ? 
+                  this.config.surfaceGlowOpacity : 
+                  this.config.deepGlowOpacity + depthFactor * 0.15;
+      
+      // Make opacity pulse with wave height for surface creatures
+      if (creature.depth < 0.3) {
+        opacity += Math.sin(now * 2 + creature.x * 0.05) * 0.1 * (0.3 - creature.depth) / 0.3;
+      }
+      
+      // Increase brightness when near mouse
+      if (mouseDistance < this.mouseWaveRadius) {
+        const mouseFactor = 1 - mouseDistance / this.mouseWaveRadius;
+        opacity += mouseFactor * 0.2 * (1 - creature.depth);
+      }
+      
+      // Calculate glow radius based on depth, with wave-based pulsing
+      let glowRadius = creature.atSurface ? 
+                     this.config.surfaceGlowRadius : 
+                     this.config.deepGlowRadius + depthFactor * 15;
+      
+      // Add pulsing effect to surface creatures based on waves
+      if (creature.depth < 0.3) {
+        const pulseFactor = (0.3 - creature.depth) / 0.3; // 0 at depth 0.3, 1 at surface
+        glowRadius += Math.sin(now * 2 + creature.x * 0.02) * 5 * pulseFactor;
+      }
       
       // Parse color to get HSL components
       const hslMatch = creature.color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
@@ -454,20 +520,37 @@ class BioluminescentSea {
                       
       const baseLightness = Math.min(90, Math.max(20, lightness));
       
-      // Create wave distortion effect for surface creatures
+      // Create wave distortion effect for creatures
       let drawX = creature.x;
       let drawY = creature.y;
       
-      if (creature.atSurface) {
-        // Apply wave position to surface creatures
-        drawX += waveHeight * 0.5;
-        drawY += waveHeight * 0.5;
+      // Apply wave displacement - stronger for surface creatures
+      const surfaceFactor = creature.atSurface ? 1 : Math.max(0, 0.6 - creature.depth * 2);
+      
+      // Add wave-based displacement
+      drawX += waveResponse * 0.6 * surfaceFactor;
+      drawY += waveResponse * 0.4 * surfaceFactor;
+      
+      // Add shape distortion for creatures near surface with mouse interaction
+      let stretchX = 1;
+      let stretchY = 1;
+      if (distortionFactor > 0) {
+        // Calculate distortion direction from mouse
+        const dx = creature.x - this.mousePosition.x;
+        const dy = creature.y - this.mousePosition.y;
+        const angle = Math.atan2(dy, dx);
+        
+        // Create stretch/compress effect in direction away from mouse
+        stretchX = 1 + Math.abs(Math.cos(angle) * distortionFactor);
+        stretchY = 1 + Math.abs(Math.sin(angle) * distortionFactor);
       }
       
-      // Draw creature glow
+      // Draw elongated creature glow
+      this.ctx.setTransform(stretchX, 0, 0, stretchY, drawX, drawY);
+      
       const gradient = this.ctx.createRadialGradient(
-        drawX, drawY, 0,
-        drawX, drawY, glowRadius
+        0, 0, 0,
+        0, 0, glowRadius
       );
       
       // Create brightened version for center of glow
@@ -482,17 +565,29 @@ class BioluminescentSea {
       
       this.ctx.fillStyle = gradient;
       this.ctx.beginPath();
-      this.ctx.arc(drawX, drawY, glowRadius, 0, Math.PI * 2);
+      this.ctx.arc(0, 0, glowRadius, 0, Math.PI * 2);
       this.ctx.fill();
       
-      // Draw the creature itself
+      // Draw the creature itself with pulsing
       const creatureLightness = Math.min(98, baseLightness + 30);
+      let creatureSize = creature.size * (1 - creature.depth * 0.5);
+      
+      // Add pulsing size effect for surface creatures
+      if (creature.depth < 0.3) {
+        const pulseFactor = (0.3 - creature.depth) / 0.3;
+        const pulseAmount = 0.2 * pulseFactor;
+        creatureSize *= 1 + Math.sin(now * 3 + creature.x * 0.03) * pulseAmount;
+      }
+      
       const creatureColor = `hsla(${h}, ${s}%, ${creatureLightness}%, ${(opacity + 0.3) * creature.brightnessFactor})`;
       
       this.ctx.fillStyle = creatureColor;
       this.ctx.beginPath();
-      this.ctx.arc(drawX, drawY, creature.size * (1 - creature.depth * 0.5), 0, Math.PI * 2);
+      this.ctx.arc(0, 0, creatureSize, 0, Math.PI * 2);
       this.ctx.fill();
+      
+      // Reset transformation
+      this.ctx.setTransform(1, 0, 0, 1, 0, 0);
       
       // If at surface, illuminate surrounding area to show waves
       if (creature.atSurface) {
