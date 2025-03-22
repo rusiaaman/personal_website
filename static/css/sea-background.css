@@ -1,0 +1,42 @@
+/* Styles for the sea background */
+
+body {
+  position: relative;
+  background-color: #000000; /* Pure black background */
+  overflow-x: hidden; /* Prevent horizontal scrolling due to waves */
+}
+
+#sea-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  will-change: transform; /* Performance optimization */
+}
+
+/* Ensure content is readable against the animated background */
+main, article, section, #post-body, #post-list, #profile {
+  position: relative;
+  z-index: 1;
+}
+
+/* Add subtle text shadow to improve readability */
+h1, h2, h3, h4, h5, h6, p, li, span, a {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+/* Create a subtle semi-transparent background for content areas */
+#wrapper {
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(3px);
+  border-radius: 8px;
+}
+
+/* Adjust navigation for the sea theme */
+nav.main-nav {
+  background: transparent;
+  backdrop-filter: none;
+}

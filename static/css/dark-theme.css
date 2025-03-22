@@ -1,0 +1,256 @@
+/* Dark theme overrides */
+body {
+  background-color: #000000; /* Pure black background */
+  color: #B0B0B0;
+}
+
+/* Make content more readable against the animated background */
+#wrapper {
+  padding: 60px 50px 100px 50px; /* Slightly more padding */
+}
+
+/* Main typography */
+h1, h2, h3, h4, h5, h6 {
+  color: #E0E0E0; /* Less harsh than pure white */
+}
+
+/* Name styling - make it more prominent */
+.profile h1 {
+  color: #4ae0c0; /* Cyan-green color to match bioluminescence */
+  font-size: 28px; /* Larger font size */
+  font-weight: 500; /* Slightly bolder */
+  letter-spacing: 0.5px; /* Slightly increased letter spacing */
+  margin-bottom: 10px; /* More space below name */
+  text-shadow: 0 0 15px rgba(74, 224, 192, 0.4); /* Subtle glow effect */
+}
+
+h2 {
+  color: #888888;
+}
+
+b, strong {
+  color: #E0E0E0; /* Less harsh than pure white */
+}
+
+/* Profile bio text */
+.profile h2 {
+  color: #AAAAAA; /* Slightly brighter than default */
+  font-size: 18px; /* Slightly larger */
+  line-height: 1.5; /* Improved readability */
+}
+
+/* Links */
+a, #title, #post-list li:hover .dates, #title:hover, #archive-link, #sharing a:hover {
+  color: #2b8574; /* Darker cyan-green color for normal state */
+}
+
+p a, #post-list.archive.readmore a, a[href], a:link, a:visited {
+  color: #2b8574 !important; /* Darker cyan-green for normal state - important to override theme */
+}
+
+/* Post links normal state should be dimmer */
+#post-list a, .post-list a {
+  color: #2b8574 !important; /* Dimmer for post links */
+}
+
+/* Post links hover state can be brighter */
+#post-list a:hover, .post-list a:hover {
+  color: #4ae0c0 !important; /* Brighter on hover */
+}
+
+/* Navigation */
+nav.main-nav {
+  background: transparent;
+}
+
+nav.main-nav a {
+  color: #2b8574; /* Darker cyan-green for normal state */
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8); /* Enhanced text shadow for better readability */
+}
+
+/* Lists */
+#post-list a {
+  color: #E0E0E0; /* Less harsh than pure white */
+  font-weight: 500; /* Slightly bolder for better visibility */
+}
+
+#post-list .dates {
+  color: #888888; /* Brighter for better visibility */
+}
+
+#post-list li, #archive-list li {
+  border-top: 1px solid #222222;
+}
+
+#post-list li:last-child {
+  border-bottom: 1px solid #222222;
+}
+
+/* Post */
+.post h1 {
+  color: #E0E0E0; /* Less harsh than pure white */
+  font-weight: 500; /* Better readability */
+}
+
+.post h2 {
+  color: #CCCCCC; /* Slightly softer than DDDDDD */
+}
+
+.post h2.subtitle {
+  color: #888888; /* Slightly brighter than #777777 */
+}
+
+.post h2.headline {
+  color: #AAAAAA; /* Brighter than #999999 */
+}
+
+#post-list h2 {
+  color: #999999; /* Slightly brighter for better visibility */
+}
+
+/* Code blocks */
+pre {
+  background-color: #1A1A1A;
+  color: #D0D4D7;
+  border: 1px solid #333; /* Subtle border for better definition */
+  border-radius: 4px; /* Rounded corners */
+}
+
+code {
+  background-color: #282828; /* Slightly darker than before */
+  color: #E0E0E0; /* Brighter for better contrast */
+  padding: 2px 5px; /* More padding for better readability */
+  border-radius: 3px; /* Rounded corners */
+  font-weight: 500; /* Medium weight for better visibility */
+}
+
+/* Tables */
+th {
+  color: #FFFFFF;
+  border-bottom: 1px solid #444444;
+}
+
+tr > td {
+  border-top: 1px solid #333333;
+}
+
+tr:nth-child(odd) > td {
+  background: #111111;
+}
+
+/* Blockquotes */
+blockquote {
+  border-left: 3px solid #333333;
+}
+
+/* Horizontal rule */
+hr {
+  background: #333333;
+}
+
+/* Footer */
+p.small {
+  color: #666666;
+}
+
+#footer {
+  border-top: 1px solid #222222;
+}
+
+/* Archive */
+h2.month {
+  border-bottom: 1px solid #333333;
+}
+
+#archive-list a {
+  color: #FFFFFF;
+}
+
+#archive-list .dates {
+  color: #777777;
+}
+
+/* Social icons */
+a.symbol {
+  color: #777777;
+}
+
+a.symbol:hover {
+  color: #4ae0c0; /* Cyan-green color to match bioluminescence */
+}
+
+/* Post meta */
+#post-meta {
+  border-top: 1px solid #222222;
+  border-bottom: 1px solid #222222;
+  color: #888888;
+}
+
+#post-meta div span {
+  color: #666666;
+}
+
+#post-meta div span.dark {
+  color: #DDDDDD;
+}
+
+#post-meta img.avatar {
+  box-shadow: 0 0 0 3px #000000, 0 0 0 4px #333333;
+}
+
+/* Post navigation */
+#post-nav {
+  color: #888888;
+}
+
+/* Bioluminescent effects for interactive elements */
+a:hover, #title:hover, nav.main-nav a:hover, #post-list a:hover, #post-list.archive.readmore a:hover,
+#archive-link:hover, #post-nav span.prev:hover, #post-nav span.next:hover {
+  color: #4ae0c0 !important; /* Moderate cyan on hover - important to override theme */
+  text-shadow: 0 0 8px rgba(74, 224, 192, 0.6); /* Glow effect on hover */
+  transition: all 0.3s ease;
+}
+
+/* Read more links in post list */
+#post-list.archive.readmore a {
+  color: #2b8574 !important; /* Darker cyan-green for normal state */
+}
+
+/* Archive link styling */
+#archive-link {
+  color: #4ae0c0 !important;
+  box-shadow: 0 0 0 1px rgba(74, 224, 192, 0.3) !important;
+}
+
+#archive-link:hover {
+  background: rgba(74, 224, 192, 0.2) !important;
+  color: #60ffda !important;
+  box-shadow: 0 0 0 1px rgba(74, 224, 192, 0.5) !important;
+}
+
+/* Special styling for the Subscribe button - with stronger overrides */
+body nav.main-nav a.cta,
+html body nav.main-nav a.cta,
+nav.main-nav a.cta,
+a.cyan-button,
+.cyan-button {
+  background: #4ae0c0 !important; /* Solid cyan background */
+  background-color: #4ae0c0 !important; /* Double property for better override */
+  border: 1px solid #4ae0c0 !important; /* Border color matching the theme */
+  color: #001a18 !important; /* Dark cyan-tinted color for contrast */
+  font-weight: 500 !important; /* Make text slightly bolder */
+  text-shadow: none !important; /* Remove text shadow for better readability */
+  transition: all 0.3s ease !important;
+}
+
+body nav.main-nav a.cta:hover,
+html body nav.main-nav a.cta:hover,
+nav.main-nav a.cta:hover,
+a.cyan-button:hover,
+.cyan-button:hover {
+  background: #60ffda !important; /* Brighter cyan on hover */
+  background-color: #60ffda !important; /* Double property for better override */
+  border-color: #60ffda !important;
+  color: #000000 !important; /* Black text on hover for contrast */
+  box-shadow: 0 0 12px rgba(74, 224, 192, 0.8) !important; /* Glow effect on hover */
+}
