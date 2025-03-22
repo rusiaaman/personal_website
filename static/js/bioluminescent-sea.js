@@ -13,6 +13,15 @@ class BioluminescentSea {
     this.lastSaveTime = 0;
     this.saveInterval = 1000; // Save state every 1 second
     
+    // Mouse interaction properties
+    this.mousePosition = { x: null, y: null };
+    this.mouseWaveIntensity = 0;
+    this.mouseWaveRadius = 200; // Radius of influence from mouse position
+    this.mouseWaveDecay = 0.98; // How quickly the mouse wave fades
+    this.mouseWaveMaxIntensity = 15; // Maximum wave height from mouse
+    this.lastMouseMoveTime = 0;
+    this.mouseIdle = true;
+    
     // Configuration
     this.config = {
       creatureSize: { min: 1, max: 4 },
@@ -31,6 +40,7 @@ class BioluminescentSea {
     
     this.waveGrid = []; // 2D grid for wave heights
     this.waveSeed = Math.random() * 1000; // Random seed for wave generation
+    this.mouseWaves = []; // Array to store mouse-generated waves
     
     this.init();
   }
@@ -52,6 +62,35 @@ class BioluminescentSea {
       clearTimeout(this.resizeTimeout);
       this.resizeTimeout = setTimeout(() => this.resize(), 200);
     });
+    
+    // Mouse movement handler
+    document.addEventListener('mousemove', (e) => {
+      // Update mouse position
+      this.mousePosition.x = e.clientX;
+      this.mousePosition.y = e.clientY;
+      
+      // Calculate mouse speed (distance since last move)
+      const now = performance.now();
+      const timeDelta = now - this.lastMouseMoveTime;
+      this.lastMouseMoveTime = now;
+      
+      // Generate wave intensity based on mouse movement speed
+      // But only if it's been a short time since the last move (active movement)
+      if (timeDelta < 100) {
+        // Create new wave from mouse movement
+        const intensity = Math.min(this.mouseWaveMaxIntensity, 5 + Math.random() * 10);
+        this.mouseWaveIntensity = intensity;
+        this.mouseIdle = false;
+      }
+    });
+    
+    // Set mouse to idle after no movement
+    setInterval(() => {
+      const timeSinceLastMove = performance.now() - this.lastMouseMoveTime;
+      if (timeSinceLastMove > 500) {
+        this.mouseIdle = true;
+      }
+    }, 500);
     
     // Add visibility change listener to prevent animation stopping
     document.addEventListener('visibilitychange', () => {
@@ -201,6 +240,27 @@ class BioluminescentSea {
                    amplitude;
         }
         
+        // Add mouse-influenced wave if mouse is active
+        if (!this.mouseIdle && this.mousePosition.x !== null && this.mousePosition.y !== null) {
+          const cell = this.waveGrid[y][x];
+          const dx = cell.x - this.mousePosition.x;
+          const dy = cell.y - this.mousePosition.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          // Apply wave effect in radius around mouse position
+          if (distance < this.mouseWaveRadius) {
+            // Circular wave with falloff based on distance from mouse
+            const distanceFactor = 1 - distance / this.mouseWaveRadius;
+            const mouseWaveHeight = this.mouseWaveIntensity * distanceFactor * Math.sin(distance * 0.05 - this.waveSeed * 2);
+            
+            // Add mouse wave to natural waves
+            height += mouseWaveHeight;
+          }
+        }
+        
+        // Gradually reduce mouse wave intensity
+        this.mouseWaveIntensity *= this.mouseWaveDecay;
+        
         this.waveGrid[y][x].height = height;
       }
     }
@@ -234,6 +294,7 @@ class BioluminescentSea {
     // Bilinear interpolation for smooth transition
     const topMix = h00 * (1 - fracX) + h10 * fracX;
     const bottomMix = h01 * (1 - fracX) + h11 * fracX;
+    
     return topMix * (1 - fracY) + bottomMix * fracY;
   }
   
@@ -241,9 +302,20 @@ class BioluminescentSea {
     for (let i = 0; i < this.creatures.length; i++) {
       const creature = this.creatures[i];
       
+      // Get wave height at creature's position
+      const waveHeight = this.getWaveHeight(creature.x, creature.y);
+      
       // Move the creature
       creature.x += Math.cos(creature.direction) * creature.speed * deltaTime;
       creature.y += Math.sin(creature.direction) * creature.speed * deltaTime;
+      
+      // If creature is near surface, add some wave-based motion
+      if (creature.depth < 0.3) {
+        // Apply stronger wave influence to creatures closer to surface
+        const waveInfluence = (0.3 - creature.depth) / 0.3;
+        creature.x += waveHeight * 0.02 * waveInfluence;
+        creature.y += waveHeight * 0.01 * waveInfluence;
+      }
       
       // Occasionally change direction (100x less frequent)
       if (Math.random() < 0.0001) {
@@ -311,6 +383,22 @@ class BioluminescentSea {
         this.ctx.stroke();
       }
     }
+    
+    // Visualize mouse influence area if active
+    if (!this.mouseIdle && this.mousePosition.x !== null && this.mousePosition.y !== null) {
+      // Draw radius of influence
+      this.ctx.strokeStyle = 'rgba(100, 255, 220, 0.1)';
+      this.ctx.beginPath();
+      this.ctx.arc(this.mousePosition.x, this.mousePosition.y, this.mouseWaveRadius, 0, Math.PI * 2);
+      this.ctx.stroke();
+      
+      // Draw current intensity
+      this.ctx.fillStyle = 'rgba(100, 255, 220, 0.05)';
+      this.ctx.beginPath();
+      this.ctx.arc(this.mousePosition.x, this.mousePosition.y, 
+                  this.mouseWaveIntensity * 2, 0, Math.PI * 2);
+      this.ctx.fill();
+    }
   }
   
   drawCreatures() {
@@ -321,6 +409,26 @@ class BioluminescentSea {
       this.ctx.save();
       
       const waveHeight = this.getWaveHeight(creature.x, creature.y);
+      
+      // Make creatures respond more dramatically to mouse-generated waves
+      let waveResponse = waveHeight;
+      if (!this.mouseIdle && this.mousePosition.x !== null && this.mousePosition.y !== null) {
+        const dx = creature.x - this.mousePosition.x;
+        const dy = creature.y - this.mousePosition.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance < this.mouseWaveRadius * 1.5) {
+          // Creatures respond more to mouse waves when they're near the surface
+          const depthFactor = 1 - Math.min(1, creature.depth * 2);
+          const distanceFactor = 1 - distance / (this.mouseWaveRadius * 1.5);
+          waveResponse = waveHeight * (1 + depthFactor * distanceFactor * 3);
+          
+          // Chance for deep creatures to be attracted toward surface by mouse movement
+          if (creature.depth > 0.4 && Math.random() < 0.01 * distanceFactor) {
+            creature.targetDepth = Math.max(0.1, creature.targetDepth - 0.1);
+          }
+        }
+      }
       
       // Calculate brightness based on depth
       const depthFactor = 1 - creature.depth;
@@ -397,7 +505,20 @@ class BioluminescentSea {
   
   illuminateWaves(creature, waveHeight) {
     const radius = this.config.surfaceGlowRadius * 2;
-    const illuminationIntensity = 0.15 + Math.abs(waveHeight) * 0.02;
+    let illuminationIntensity = 0.15 + Math.abs(waveHeight) * 0.02;
+    
+    // Enhance illumination near mouse cursor
+    if (!this.mouseIdle && this.mousePosition.x !== null && this.mousePosition.y !== null) {
+      const dx = creature.x - this.mousePosition.x;
+      const dy = creature.y - this.mousePosition.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      // Increase illumination for creatures near mouse
+      if (distance < this.mouseWaveRadius * 2) {
+        const mouseFactor = 1 - Math.min(1, distance / (this.mouseWaveRadius * 2));
+        illuminationIntensity += mouseFactor * 0.2; // Boost illumination near mouse
+      }
+    }
     
     // Parse color for wave illumination
     const hslMatch = creature.color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
@@ -424,6 +545,13 @@ class BioluminescentSea {
     const endX = Math.min(Math.ceil(this.canvas.width / gridSize), Math.ceil((creature.x + radius) / gridSize));
     const endY = Math.min(Math.ceil(this.canvas.height / gridSize), Math.ceil((creature.y + radius) / gridSize));
     
+    // Check if we should add extra wave details near mouse
+    const nearMouse = !this.mouseIdle && 
+                      this.mousePosition.x !== null && 
+                      this.mousePosition.y !== null && 
+                      Math.abs(creature.x - this.mousePosition.x) < this.mouseWaveRadius * 2 && 
+                      Math.abs(creature.y - this.mousePosition.y) < this.mouseWaveRadius * 2;
+    
     for (let y = startY; y < endY; y++) {
       for (let x = startX; x < endX; x++) {
         const pointX = x * gridSize;
@@ -436,16 +564,33 @@ class BioluminescentSea {
         
         if (distance < radius) {
           // Get wave height at this point
-          const waveHeight = this.getWaveHeight(pointX, pointY);
+          let waveHeight = this.getWaveHeight(pointX, pointY);
+          
+          // Enhance wave visibility near mouse
+          if (nearMouse) {
+            const mouseDx = pointX - this.mousePosition.x;
+            const mouseDy = pointY - this.mousePosition.y;
+            const mouseDistance = Math.sqrt(mouseDx * mouseDx + mouseDy * mouseDy);
+            
+            if (mouseDistance < this.mouseWaveRadius) {
+              // Amplify waves in mouse influence area
+              const mouseFactor = 1 - mouseDistance / this.mouseWaveRadius;
+              waveHeight *= (1 + mouseFactor);
+            }
+          }
           
           // Only draw highlights at wave peaks
           if (waveHeight > 1) {
             const opacity = (1 - distance / radius) * 0.2 * Math.min(1, waveHeight * 0.3);
             this.ctx.fillStyle = `rgba(${this.hslToRgb(h, 80, 80)}, ${opacity})`;
             
-            // Draw highlight dot
+            // Draw highlight dot, bigger near mouse
+            const dotSize = nearMouse ? 
+                          1 + Math.abs(waveHeight) * 0.6 : 
+                          1 + Math.abs(waveHeight) * 0.3;
+            
             this.ctx.beginPath();
-            this.ctx.arc(pointX, pointY, 1 + Math.abs(waveHeight) * 0.3, 0, Math.PI * 2);
+            this.ctx.arc(pointX, pointY, dotSize, 0, Math.PI * 2);
             this.ctx.fill();
           }
         }
@@ -496,6 +641,9 @@ class BioluminescentSea {
     
     // Update and draw waves
     this.updateWaves(deltaTime);
+    
+    // Uncomment to see wave grid visually
+    // this.drawWaveGridDebug();
     
     // Update and draw creatures
     this.updateCreatures(deltaTime);
