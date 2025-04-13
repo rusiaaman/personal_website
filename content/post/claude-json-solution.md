@@ -1,6 +1,6 @@
 ---
 Author: Aman Rusia
-Date: 2025-13-4
+Date: 2025-04-13
 title: "How Claude avoids JSON accuracy issue in tool calling"
 ---
 
