@@ -17,8 +17,8 @@ disqusShortname = ""
 
 	# Integrate Javascript files or stylesheets by adding the url to the external assets or by
 	# linking local files with their path relative to the static folder, e.g. "css/styles.css"
-	customCSS = ["css/dark-theme.css", "css/sea-background.css", "css/button-override.css"]
-	customJS  = ["js/bioluminescent-sea.js", "js/animation-controls.js", "js/page-transition.js"]
+	customCSS = ["css/dark-theme.css", "css/button-override.css", "css/modern-effects.css"]
+	customJS  = ["js/subtle-background.js", "js/particle-network.js", "js/scroll-progress.js", "js/animation-controls.js", "js/page-transition.js"]
 
 	# The variables below are optionally too and can be used to
 	# translate or customize each string of the theme.
