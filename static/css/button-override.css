@@ -14,3 +14,10 @@ nav.main-nav a.cta:hover {
   color: #000000 !important;
   box-shadow: 0 0 12px rgba(74, 224, 192, 0.8) !important;
 }
+
+/* Fix navigation alignment */
+nav.main-nav a {
+  vertical-align: middle !important;
+  top: 0 !important;
+  display: inline-block !important;
+}
