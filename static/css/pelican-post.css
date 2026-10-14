@@ -3,7 +3,7 @@
 .ep-short-article { font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; color:#b0b0b0; }
 .ep-short-article p { margin:0; }
 .ep-short-article a::before { content:none; }
-.ep-short-article a:focus-visible,.ep-short-article summary:focus-visible,.ep-diverse-grid-tooltip-trigger:focus-visible { outline:2px solid #4ae0c0; outline-offset:4px; }
+.ep-short-article a:focus-visible,.ep-short-article summary:focus-visible { outline:2px solid #4ae0c0; outline-offset:4px; }
 .ep-post-header { margin-bottom:48px; }
 .ep-post-title { font-size:36px; font-weight:500; line-height:1.2; letter-spacing:-1.2px; color:#e0e0e0; margin:0; }
 .ep-short-article .ep-publication-date { margin-top:16px; font-size:13px; color:#777; }
@@ -12,10 +12,6 @@
 .ep-short-article .ep-model-output-attribution { margin-top:12px; font-size:11px; color:#777; }
 .ep-short-article .ep-model-output-attribution a,.ep-short-article .ep-research-paper-link { color:#4ae0c0 !important; text-decoration:underline; text-underline-offset:4px; }
 .ep-diverse-pelican-examples { margin-top:40px; }
-.ep-diverse-grid-tooltip-trigger { position:relative; }
-.ep-clothes-tooltip { display:none; pointer-events:none; position:absolute; right:16px; bottom:16px; border:1px solid #4ae0c066; background:#08130ff2; border-radius:4px; padding:10px 16px; color:#baf5df; font-size:13px; font-weight:500; box-shadow:0 8px 18px #0004; }
-.ep-clothes-tooltip span { color:#4ae0c0; margin-left:8px; }
-.ep-diverse-grid-tooltip-trigger:hover .ep-clothes-tooltip,.ep-diverse-grid-tooltip-trigger:focus .ep-clothes-tooltip { display:block; }
 .ep-short-article .ep-diversity-collapse-thesis { margin-top:40px; font-size:22px; font-style:italic; line-height:1.5; color:#e0e0e0; }
 .ep-research-divider { margin:128px 0 64px; height:0; border:0; border-top:1px solid #333; background:none; }
 .ep-short-article .ep-paper-introduction { margin-top:0; font-size:17px; line-height:32px; }
@@ -60,3 +56,7 @@
 .ep-author-footer > span { color:#aaa; }
 .ep-short-article .ep-author-footer p { margin-top:8px; }
 @media (max-width:600px) { #wrapper:has(.ep-short-article) { padding:40px 20px; } .ep-post-title { font-size:30px; } .ep-leaderboard-heading { gap:12px; } .ep-updated-x-post-excerpt,.ep-updated-full-x-post-text { padding:20px; } }
+
+.ep-short-article .ep-model-pelican-examples .ep-first-comparison-prompt { margin-bottom:12px; }
+.ep-short-article .ep-benchmark-prompt { margin-bottom:24px; font-size:15px; line-height:1.8; }
+.ep-benchmark-prompt code { white-space:normal; overflow-wrap:anywhere; }
